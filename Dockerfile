@@ -1,4 +1,4 @@
-FROM openjdk:11 as builder
+FROM ubuntu:latest
 
 RUN mkdir -p /home && \
     cd /home 
@@ -6,13 +6,14 @@ RUN mkdir -p /home && \
 COPY . /home
 WORKDIR /home/oscar
 RUN apt-get update
-RUN apt-get install -y maven
-RUN cd /home/oscar/ mvn package -Dmaven.test.skip=true
+RUN apt-get install -y \
+    && apt-get install -y wget
 
-FROM tomcat:8-jre8 as ship
+FROM tomcat:9-jre8 as ship
 #FROM 9.0.65-jdk8-openjdk-slim as ship
 
-COPY --from=builder /home/oscar/target/oscar-14.0.0-SNAPSHOT.war /usr/local/tomcat/webapps/oscar_mcmaster.war
+RUN wget http://sourceforge.net/projects/oscarmcmaster/files/Oscar\ Debian\+Ubuntu\ deb\ Package/oscar_emr19-69~2239.deb
+RUN dpkg -i oscar_emr19-69~2239.deb
 ADD conf /usr/local/tomcat/conf
 COPY conf/oscar_mcmaster.properties /root/oscar_mcmaster.properties
 
